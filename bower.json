@@ -1,0 +1,23 @@
+{
+  "name": "Gitskarios",
+  "version": "2.3.0",
+  "homepage": "https://github.com/gitskarios/Gitskarios",
+  "authors": [
+    "Bernat Borrás Paronella <bernatbor15@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^0.5",
+    "webcomponentsjs": "~0.7.0"
+  },
+  "resolutions": {
+    "webcomponentsjs": "~0.7.0"
+  }
+}
