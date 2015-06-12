@@ -122,6 +122,7 @@
         <activity android:name="com.alorma.github.ui.activity.WatchedReposActivity" />
         <activity android:name="com.alorma.github.ui.activity.OrganizationsActivity" />
         <activity android:name="com.alorma.github.ui.activity.SearchIssuesActivity" />
+        <activity android:name="com.alorma.github.ui.activity.IssuesListActivity" />
 
         <meta-data
             android:name="io.fabric.ApiKey"

@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.alorma.github.R;
 import com.alorma.github.sdk.bean.dto.response.Branch;
 import com.alorma.github.sdk.bean.info.RepoInfo;
+import com.alorma.github.ui.activity.IssuesListActivity;
 import com.alorma.gitskarios.basesdk.client.BaseClient;
 import com.alorma.github.sdk.services.repo.GetReadmeContentsClient;
 import com.alorma.github.ui.ErrorHandler;
@@ -33,19 +34,23 @@ import retrofit.client.Response;
 /**
  * Created by Bernat on 22/07/2014.
  */
-public class ReadmeFragment extends BaseFragment implements BaseClient.OnResultCallback<String>, BranchManager, TitleProvider {
+public class ReadmeFragment extends BaseFragment implements BaseClient.OnResultCallback<String>, BranchManager, TitleProvider, View.OnClickListener {
 
     private static final String REPO_INFO = "REPO_INFO";
+    private static final String OPEN_ISSUES_COUNT = "OPEN_ISSUES_COUNT";
     private RepoInfo repoInfo;
 
     private TextView htmlContentView;
+    private TextView issuesNumber;
 
     private UpdateReceiver updateReceiver;
     private SmoothProgressBar progressBar;
+    private int openIssuesCount = -1;
 
-    public static ReadmeFragment newInstance(RepoInfo repoInfo) {
+    public static ReadmeFragment newInstance(RepoInfo repoInfo, int open_issues_count) {
         Bundle bundle = new Bundle();
         bundle.putParcelable(REPO_INFO, repoInfo);
+        bundle.putInt(OPEN_ISSUES_COUNT, open_issues_count);
 
         ReadmeFragment f = new ReadmeFragment();
         f.setArguments(bundle);
@@ -68,18 +73,26 @@ public class ReadmeFragment extends BaseFragment implements BaseClient.OnResultC
 
             progressBar = (SmoothProgressBar) view.findViewById(R.id.progress);
             htmlContentView = (TextView) view.findViewById(R.id.htmlContentView);
+            issuesNumber = (TextView) view.findViewById(R.id.issuesNumber);
 
             int color = AttributesUtils.getPrimaryColor(getActivity());
 
             progressBar.setSmoothProgressDrawableColor(color);
 
             getContent();
+
+            if (openIssuesCount >= 0) {
+                issuesNumber.setText(String.valueOf(openIssuesCount));
+            }
+
+            issuesNumber.setOnClickListener(this);
         }
     }
 
     protected void loadArguments() {
         if (getArguments() != null) {
             repoInfo = getArguments().getParcelable(REPO_INFO);
+            openIssuesCount = getArguments().getInt(OPEN_ISSUES_COUNT);
         }
     }
 
@@ -156,6 +169,23 @@ public class ReadmeFragment extends BaseFragment implements BaseClient.OnResultC
     public void onStop() {
         super.onStop();
         getActivity().unregisterReceiver(updateReceiver);
+    }
+
+    public void setIssuesNumber(int openIssues) {
+        this.openIssuesCount = openIssues;
+        if (issuesNumber != null) {
+            issuesNumber.setText(String.valueOf(openIssuesCount));
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.issuesNumber:
+                Intent intent = IssuesListActivity.createLauncher(getActivity(), repoInfo);
+                startActivity(intent);
+                break;
+        }
     }
 
     public class UpdateReceiver extends BroadcastReceiver {

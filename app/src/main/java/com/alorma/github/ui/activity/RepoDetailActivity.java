@@ -283,7 +283,7 @@ public class RepoDetailActivity extends BackActivity implements BaseClient.OnRes
     private void createFragments() {
 
 //        aboutFragment = RepoAboutFragment.newInstance(getRepoInfo());
-        readmeFragment = ReadmeFragment.newInstance(getRepoInfo());
+        readmeFragment = ReadmeFragment.newInstance(getRepoInfo(), currentRepo.open_issues_count);
         sourceListFragment = SourceListFragment.newInstance(getRepoInfo());
         commitsListFragment = CommitsListFragment.newInstance(getRepoInfo());
         issuesListFragment = IssuesListFragment.newInstance(getRepoInfo(), false);
