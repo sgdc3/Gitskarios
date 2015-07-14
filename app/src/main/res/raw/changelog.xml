@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog bulletedList="false">
+    <changelogversion versionName="2.5.0" changeDate="Jul 14,2015">
+        <changelogtext>Improved issues filter</changelogtext>
+        <changelogtext>Improved users list and detail</changelogtext>
+        <changelogtext>Bugs fix</changelogtext>
+    </changelogversion>
     <changelogversion versionName="2.4.8" changeDate="Jul 08,2015">
         <changelogtext>Added support for Emojis when you create new issue, or add a comment.</changelogtext>
         <changelogtext>Added rich text editor (comments and creating issue).</changelogtext>
