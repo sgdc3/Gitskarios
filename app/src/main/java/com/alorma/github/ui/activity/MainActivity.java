@@ -531,7 +531,9 @@ public class MainActivity extends BaseActivity implements OnMenuItemSelectedList
     @Override
     public void onStop() {
         try {
-            dialog.dismiss();
+            if (dialog != null) {
+                dialog.dismiss();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

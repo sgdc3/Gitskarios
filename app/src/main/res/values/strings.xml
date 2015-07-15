@@ -362,4 +362,7 @@
     <string name="url_of_copied">%s url copied</string>
     <string name="content_history">%s history</string>
     <string name="sha_copied">%s copied</string>
+    <string name="widget_label_repo_issues">Repo issues</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 </resources>
