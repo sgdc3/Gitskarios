@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.Handler;
 import android.widget.RemoteViews;
 
 import com.alorma.github.R;
@@ -60,24 +61,31 @@ public class RepoIssuesWidget extends AppWidgetProvider {
         realm.close();
     }
 
-    public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-                                       int appWidgetId) {
-        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.repo_issues_widget);
+    public static void updateAppWidget(final Context context, final AppWidgetManager appWidgetManager,
+                                       final int appWidgetId) {
 
-        int number = new Random().nextInt(100);
-        remoteViews.setTextViewText(R.id.repo_issues_title, String.valueOf(number) + " issues");
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.repo_issues_widget);
+                int number = new Random().nextInt(100);
+                remoteViews.setTextViewText(R.id.repo_issues_title, String.valueOf(number) + " issues");
 
-        Realm realm = Realm.getInstance(context.getApplicationContext());
+                Realm realm = Realm.getInstance(context.getApplicationContext());
 
-        RepoWidgetIdentifier identifier = realm.where(RepoWidgetIdentifier.class).equalTo("widgetId", appWidgetId).findFirst();
+                RepoWidgetIdentifier identifier = realm.where(RepoWidgetIdentifier.class).equalTo("widgetId", appWidgetId).findFirst();
 
-        if (identifier != null) {
-            String text = identifier.getOwner() + "/" + identifier.getRepo();
-            remoteViews.setTextViewText(R.id.repo_issues_text, text);
-        }
+                if (identifier != null) {
+                    String text = identifier.getOwner() + "/" + identifier.getRepo();
+                    remoteViews.setTextViewText(R.id.repo_issues_text, text);
+                }
 
-        realm.close();
-        appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
+                realm.close();
+                appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
+            }
+        };
+
+        new Handler().postDelayed(runnable, 1000);
     }
 
 }
