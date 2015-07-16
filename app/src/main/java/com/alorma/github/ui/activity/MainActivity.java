@@ -5,6 +5,8 @@ import android.accounts.AccountManager;
 import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -43,6 +45,7 @@ import com.alorma.github.ui.fragment.events.EventsListFragment;
 import com.alorma.github.ui.fragment.menu.OnMenuItemSelectedListener;
 import com.alorma.github.ui.view.GitskariosProfileDrawerItem;
 import com.alorma.github.ui.view.NotificationsActionProvider;
+import com.alorma.github.ui.widget.UpdateWidgetsService;
 import com.mikepenz.aboutlibraries.Libs;
 import com.mikepenz.aboutlibraries.LibsBuilder;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
@@ -519,7 +522,7 @@ public class MainActivity extends BaseActivity implements OnMenuItemSelectedList
         } else {
             if (lastUsedFragment instanceof EventsListFragment) {
                 finish();
-            } else if (lastUsedFragment instanceof GeneralReposFragment && resultDrawer != null){
+            } else if (lastUsedFragment instanceof GeneralReposFragment && resultDrawer != null) {
                 resultDrawer.setSelection(0);
             } else {
                 clearFragments();

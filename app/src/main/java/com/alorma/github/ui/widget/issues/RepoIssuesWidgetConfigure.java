@@ -9,12 +9,13 @@ import com.alorma.github.ui.activity.base.BackActivity;
 import com.alorma.github.ui.widget.RepoWidgetIdentifier;
 
 import io.realm.Realm;
-import io.realm.RealmResults;
 
 /**
  * Created by Bernat on 15/07/2015.
  */
 public class RepoIssuesWidgetConfigure extends BackActivity {
+
+    private static final int REQUEST_UPDATE_WIDGETS_CODE = 452;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,8 +23,6 @@ public class RepoIssuesWidgetConfigure extends BackActivity {
         setContentView(R.layout.repo_issues_widget_configure);
 
         setResult(RESULT_CANCELED);
-
-        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
 
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
@@ -41,8 +40,8 @@ public class RepoIssuesWidgetConfigure extends BackActivity {
 
         RepoWidgetIdentifier identifier = new RepoWidgetIdentifier();
         identifier.setWidgetId(mAppWidgetId);
-        identifier.setOwner("gitskarios");
-        identifier.setRepo("Gitskarios");
+        identifier.setOwner("alorma");
+        identifier.setRepo("eva_icns_test");
 
         Realm realm = Realm.getInstance(getApplicationContext());
         realm.beginTransaction();
@@ -54,10 +53,9 @@ public class RepoIssuesWidgetConfigure extends BackActivity {
         realm.close();
         realm = null;
 
-        RepoIssuesWidget.updateAppWidget(this, appWidgetManager, mAppWidgetId);
-
         Intent resultValue = new Intent();
         resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
+
         setResult(RESULT_OK, resultValue);
         finish();
     }

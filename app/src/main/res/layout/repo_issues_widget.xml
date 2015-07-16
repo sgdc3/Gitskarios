@@ -7,7 +7,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="72dp"
         android:background="@color/primary"
         android:gravity="center_vertical">
 
@@ -16,12 +16,11 @@
             style="@style/TextAppearance.AppCompat.Headline"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:paddingLeft="@dimen/gapLarge"
-            android:text="72 Issues"
+            android:gravity="center"
+            android:text="--"
             android:textColor="@color/white" />
     </LinearLayout>
-
+<!--
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -33,6 +32,6 @@
             android:layout_height="match_parent"
             android:gravity="center"
             android:textColor="@color/gray_github_dark" />
-    </LinearLayout>
+    </LinearLayout>-->
 
 </LinearLayout>

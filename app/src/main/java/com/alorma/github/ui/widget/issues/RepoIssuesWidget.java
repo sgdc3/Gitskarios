@@ -8,12 +8,15 @@ import android.os.Handler;
 import android.widget.RemoteViews;
 
 import com.alorma.github.R;
+import com.alorma.github.basesdk.client.BaseClient;
+import com.alorma.github.sdk.bean.dto.response.Repo;
+import com.alorma.github.sdk.bean.info.RepoInfo;
+import com.alorma.github.sdk.services.repo.GetRepoClient;
 import com.alorma.github.ui.widget.RepoWidgetIdentifier;
 
-import java.util.Random;
-
 import io.realm.Realm;
-import io.realm.RealmQuery;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 /**
  * Created by Bernat on 15/07/2015.
@@ -23,26 +26,77 @@ public class RepoIssuesWidget extends AppWidgetProvider {
     @Override
     public void onEnabled(Context context) {
         super.onEnabled(context);
+
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(context, RepoIssuesWidget.class));
+        updateWidgets(context, appWidgetManager, appWidgetIds);
     }
 
     @Override
-    public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+    public void onUpdate(final Context context, final AppWidgetManager appWidgetManager, final int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
 
-        ComponentName thisWidget = new ComponentName(context, RepoIssuesWidget.class);
+        Runnable runnable = new Runnable() {
 
-        int[] allWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
+            @Override
+            public void run() {
+                updateWidgets(context, appWidgetManager, appWidgetIds);
 
-        for (int allWidgetId : allWidgetIds) {
-            updateAppWidget(context, appWidgetManager, allWidgetId);
-        }
 
+                new Handler().postDelayed(this, 1000);
+            }
+        };
+
+        new Handler().postDelayed(runnable, 1000);
+
+        updateWidgets(context, appWidgetManager, appWidgetIds);
     }
 
-    @Override
-    public void onDisabled(Context context) {
-        super.onDisabled(context);
+    private void updateWidgets(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+        Realm realm = Realm.getInstance(context);
+        for (int appWidgetId : appWidgetIds) {
+            RepoWidgetIdentifier identifier = realm.where(RepoWidgetIdentifier.class).equalTo("widgetId", appWidgetId).findFirst();
+            if (identifier != null && identifier.getOwner() != null && identifier.getRepo() != null) {
+                RepoInfo repoInfo = new RepoInfo();
+                repoInfo.owner = identifier.getOwner();
+                repoInfo.name = identifier.getRepo();
 
+                GetRepoClient getRepoClient = new GetRepoClient(context, repoInfo);
+                getRepoClient.setOnResultCallback(new RepoCallback(context, appWidgetManager, identifier.getWidgetId()));
+                getRepoClient.execute();
+            }
+        }
+    }
+
+    private class RepoCallback implements BaseClient.OnResultCallback<Repo> {
+
+        private final Context context;
+        private AppWidgetManager appWidgetManager;
+        private final int widgetId;
+
+        public RepoCallback(Context context, AppWidgetManager appWidgetManager, int widgetId) {
+            this.context = context;
+            this.appWidgetManager = appWidgetManager;
+            this.widgetId = widgetId;
+        }
+
+        @Override
+        public void onResponseOk(Repo repo, Response r) {
+            RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.repo_issues_widget);
+
+            remoteViews.setTextViewText(R.id.repo_issues_title, String.valueOf(repo.open_issues_count));
+
+            appWidgetManager.updateAppWidget(widgetId, remoteViews);
+        }
+
+        @Override
+        public void onFail(RetrofitError error) {
+            RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.repo_issues_widget);
+
+            remoteViews.setTextViewText(R.id.repo_issues_title, "XX");
+
+            appWidgetManager.updateAppWidget(widgetId, remoteViews);
+        }
     }
 
     @Override
@@ -60,32 +114,4 @@ public class RepoIssuesWidget extends AppWidgetProvider {
         realm.commitTransaction();
         realm.close();
     }
-
-    public static void updateAppWidget(final Context context, final AppWidgetManager appWidgetManager,
-                                       final int appWidgetId) {
-
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.repo_issues_widget);
-                int number = new Random().nextInt(100);
-                remoteViews.setTextViewText(R.id.repo_issues_title, String.valueOf(number) + " issues");
-
-                Realm realm = Realm.getInstance(context.getApplicationContext());
-
-                RepoWidgetIdentifier identifier = realm.where(RepoWidgetIdentifier.class).equalTo("widgetId", appWidgetId).findFirst();
-
-                if (identifier != null) {
-                    String text = identifier.getOwner() + "/" + identifier.getRepo();
-                    remoteViews.setTextViewText(R.id.repo_issues_text, text);
-                }
-
-                realm.close();
-                appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
-            }
-        };
-
-        new Handler().postDelayed(runnable, 1000);
-    }
-
 }
