@@ -1,9 +1,13 @@
 package com.alorma.github.ui.widget.issues;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.widget.RemoteViews;
 
@@ -13,8 +17,10 @@ import com.alorma.github.sdk.bean.dto.response.Repo;
 import com.alorma.github.sdk.bean.info.RepoInfo;
 import com.alorma.github.sdk.services.repo.GetRepoClient;
 import com.alorma.github.ui.widget.RepoWidgetIdentifier;
+import com.alorma.github.ui.widget.UpdateWidgetsBroadcastReceiver;
 
 import io.realm.Realm;
+import io.realm.RealmResults;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
@@ -27,76 +33,12 @@ public class RepoIssuesWidget extends AppWidgetProvider {
     public void onEnabled(Context context) {
         super.onEnabled(context);
 
-        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(context, RepoIssuesWidget.class));
-        updateWidgets(context, appWidgetManager, appWidgetIds);
-    }
+        ComponentName receiver = new ComponentName(context, UpdateWidgetsBroadcastReceiver.class);
+        PackageManager pm = context.getPackageManager();
 
-    @Override
-    public void onUpdate(final Context context, final AppWidgetManager appWidgetManager, final int[] appWidgetIds) {
-        super.onUpdate(context, appWidgetManager, appWidgetIds);
-
-        Runnable runnable = new Runnable() {
-
-            @Override
-            public void run() {
-                updateWidgets(context, appWidgetManager, appWidgetIds);
-
-
-                new Handler().postDelayed(this, 1000);
-            }
-        };
-
-        new Handler().postDelayed(runnable, 1000);
-
-        updateWidgets(context, appWidgetManager, appWidgetIds);
-    }
-
-    private void updateWidgets(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        Realm realm = Realm.getInstance(context);
-        for (int appWidgetId : appWidgetIds) {
-            RepoWidgetIdentifier identifier = realm.where(RepoWidgetIdentifier.class).equalTo("widgetId", appWidgetId).findFirst();
-            if (identifier != null && identifier.getOwner() != null && identifier.getRepo() != null) {
-                RepoInfo repoInfo = new RepoInfo();
-                repoInfo.owner = identifier.getOwner();
-                repoInfo.name = identifier.getRepo();
-
-                GetRepoClient getRepoClient = new GetRepoClient(context, repoInfo);
-                getRepoClient.setOnResultCallback(new RepoCallback(context, appWidgetManager, identifier.getWidgetId()));
-                getRepoClient.execute();
-            }
-        }
-    }
-
-    private class RepoCallback implements BaseClient.OnResultCallback<Repo> {
-
-        private final Context context;
-        private AppWidgetManager appWidgetManager;
-        private final int widgetId;
-
-        public RepoCallback(Context context, AppWidgetManager appWidgetManager, int widgetId) {
-            this.context = context;
-            this.appWidgetManager = appWidgetManager;
-            this.widgetId = widgetId;
-        }
-
-        @Override
-        public void onResponseOk(Repo repo, Response r) {
-            RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.repo_issues_widget);
-
-            remoteViews.setTextViewText(R.id.repo_issues_title, String.valueOf(repo.open_issues_count));
-
-            appWidgetManager.updateAppWidget(widgetId, remoteViews);
-        }
-
-        @Override
-        public void onFail(RetrofitError error) {
-            RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.repo_issues_widget);
-
-            remoteViews.setTextViewText(R.id.repo_issues_title, "XX");
-
-            appWidgetManager.updateAppWidget(widgetId, remoteViews);
-        }
+        pm.setComponentEnabledSetting(receiver,
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                PackageManager.DONT_KILL_APP);
     }
 
     @Override
@@ -109,9 +51,50 @@ public class RepoIssuesWidget extends AppWidgetProvider {
         realm.beginTransaction();
         for (int appWidgetId : appWidgetIds) {
             RepoWidgetIdentifier identifier = realm.where(RepoWidgetIdentifier.class).equalTo("widgetId", appWidgetId).findFirst();
-            identifier.removeFromRealm();
+            if (identifier != null) {
+                identifier.removeFromRealm();
+            }
         }
         realm.commitTransaction();
         realm.close();
+    }
+
+    @Override
+    public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+        super.onUpdate(context, appWidgetManager, appWidgetIds);
+
+        Realm realm = Realm.getInstance(context.getApplicationContext());
+
+        for (int appWidgetId : appWidgetIds) {
+            RepoWidgetIdentifier widgetId = realm.where(RepoWidgetIdentifier.class).equalTo("widgetId", appWidgetId).findFirst();
+
+            if (widgetId != null) {
+                RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.repo_issues_widget);
+
+                remoteViews.setTextViewText(R.id.repo_issues_title, String.valueOf(widgetId.getOpenIssuesCount()));
+
+                appWidgetManager.updateAppWidget(widgetId.getWidgetId(), remoteViews);
+            }
+
+        }
+
+
+    }
+
+    @Override
+    public void onDisabled(Context context) {
+        super.onDisabled(context);
+
+        Intent intentService = new Intent(context, UpdateWidgetsIssuesService.class);
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, 0, intentService, 0);
+        AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        alarmMgr.cancel(alarmIntent);
+
+        ComponentName receiver = new ComponentName(context, UpdateWidgetsBroadcastReceiver.class);
+        PackageManager pm = context.getPackageManager();
+
+        pm.setComponentEnabledSetting(receiver,
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                PackageManager.DONT_KILL_APP);
     }
 }

@@ -3,4 +3,21 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="gitskarios"
+        android:id="@+id/gitskarios" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="material_drawer"
+        android:id="@+id/material" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="eva_icn_test"
+        android:id="@+id/icon_test" />
 </LinearLayout>

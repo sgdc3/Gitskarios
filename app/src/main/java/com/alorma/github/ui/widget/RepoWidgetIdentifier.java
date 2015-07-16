@@ -12,6 +12,7 @@ public class RepoWidgetIdentifier extends RealmObject{
     private int widgetId;
     private String owner;
     private String repo;
+    private int openIssuesCount;
 
     public int getWidgetId() {
         return widgetId;
@@ -35,5 +36,13 @@ public class RepoWidgetIdentifier extends RealmObject{
 
     public void setRepo(String repo) {
         this.repo = repo;
+    }
+
+    public int getOpenIssuesCount() {
+        return openIssuesCount;
+    }
+
+    public void setOpenIssuesCount(int openIssuesCount) {
+        this.openIssuesCount = openIssuesCount;
     }
 }
