@@ -1,6 +1,6 @@
 general:
   artifacts:
-    -/home/ubuntu/Gitskarios/app/build/outputs/apk/
+    - /home/ubuntu/Gitskarios/app/build/outputs/apk/
 machine: 
   environment:
     ANDROID_HOME: /usr/local/android-sdk-linux
